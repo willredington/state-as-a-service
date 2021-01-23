@@ -1,42 +1,67 @@
 import SimpleCard from "component/common/Card/SimpleCard";
 import useSocket from "hook/socket";
-import { AppState } from "model/state";
+import { StateItem } from "model/state";
 import React, { useEffect, useState } from "react";
 import { getStateByName } from "service/state";
+import "react-calendar/dist/Calendar.css";
+import Calendar from "react-calendar";
 
 export const Dashboard: React.FC = () => {
 	const [socket] = useSocket();
-	const [state, setState] = useState<AppState>({
-		date: "",
+
+	const [selectedDate, setSelectedDate] = useState(new Date());
+	const [state, setState] = useState<StateItem>({
+		name: "myApp",
+		props: {
+			data: "",
+		},
 	});
 
-	const handleUpdate = (payload: string) => {
-		const datum = JSON.parse(payload) as Record<"props", AppState>;
-		setState(datum.props);
+	const handleDateChange = (value: Date | Date[]) => {
+		console.log("value", value);
+		if (value && !Array.isArray(value)) {
+			setSelectedDate(value as Date);
+			sendMessage();
+		}
+	};
+
+	const handleUpdated = (newState: StateItem) => {
+		if (newState) {
+			setState(newState);
+		}
 	};
 
 	useEffect(() => {
-		getStateByName("myApp").then((response) => setState(response.props));
+		getStateByName("myApp").then((result) => setState(result));
 	}, []);
 
 	useEffect(() => {
-		socket.on("update", handleUpdate);
+		socket.on("updated", handleUpdated);
 	}, [socket]);
 
 	const sendMessage = () => {
-		console.log("fired");
-		socket.emit("action", {
+		const message = {
+			created: new Date().getTime(),
 			type: "SET_DATE",
-			group: "myApp",
-			payload: "2020-05-04",
-		});
+			stateKey: "myApp",
+			payload: selectedDate.toISOString().slice(0, 10),
+		};
+
+		console.log("sending message", message);
+
+		socket.emit("update", message);
 	};
 
 	return (
 		<div className="flex">
 			<div className="mx-8">
-				<p>current date {state.date}</p>
-				<button onClick={sendMessage}>SEND</button>
+				<p>{state.props["date"]}</p>
+				<Calendar
+					onChange={handleDateChange}
+					showWeekNumbers
+					value={selectedDate}
+				/>
+				<button onClick={sendMessage}>UPDATE</button>
 				<SimpleCard>
 					<p className="text-gray-500">
 						Lorem ipsum dolor sit amet, consectetur adipiscing elit,

@@ -4,7 +4,6 @@ import {
   WebSocketGateway,
   WebSocketServer,
 } from '@nestjs/websockets';
-import { tap } from 'rxjs/operators';
 import { Server } from 'socket.io';
 import { StateEvent } from 'src/model/event';
 import { StateService } from 'src/service/state.service';
@@ -18,7 +17,7 @@ export class ApiGateway {
 
   @SubscribeMessage('update')
   async onAction(@MessageBody() event: StateEvent) {
-    console.log('state event', event);
-    return this.stateService.updateState(event).pipe(tap(console.log));
+    const newState = await this.stateService.updateState(event);
+    this.server.sockets.emit('updated', newState);
   }
 }
