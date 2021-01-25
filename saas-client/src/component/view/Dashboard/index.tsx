@@ -34,14 +34,6 @@ export const Dashboard: React.FC = () => {
 		}
 	};
 
-	useEffect(() => {
-		getStateByName("myApp").then((result) => setState(result));
-	}, []);
-
-	useEffect(() => {
-		socket.on("updated", handleUpdated);
-	}, [socket]);
-
 	const sendMessage = (date: Date) => {
 		socket.emit("update", {
 			created: new Date().getTime(),
@@ -50,6 +42,14 @@ export const Dashboard: React.FC = () => {
 			payload: date.toISOString().slice(0, 10),
 		});
 	};
+
+	useEffect(() => {
+		getStateByName("myApp").then((result) => setState(result));
+	}, []);
+
+	useEffect(() => {
+		socket.on("updated", handleUpdated);
+	}, [socket]);
 
 	return (
 		<div className="flex">
