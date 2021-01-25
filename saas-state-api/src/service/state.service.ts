@@ -1,14 +1,14 @@
-import { HttpService, Injectable } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { StateEvent } from 'src/model/event';
-import { ReducerResponse } from 'src/model/http';
 import { StateItem } from 'src/model/state';
 import { RedisService } from './redis.service';
+import { ReducerHandlerService } from './reducer-handler.service';
 
 @Injectable()
 export class StateService {
   constructor(
     private readonly redisService: RedisService,
-    private readonly httpService: HttpService,
+    private readonly reducerHandlerService: ReducerHandlerService,
   ) {}
 
   async getStateItem(name: string) {
@@ -32,15 +32,13 @@ export class StateService {
     const stateItem = await this.getStateItem(event.stateKey);
 
     if (stateItem) {
-      const reducerResponse = await this.httpService
-        .put<ReducerResponse>('http://localhost:7000/api/reducer', {
-          state: stateItem,
-          event,
-        })
-        .toPromise();
+      const reducerResult = await this.reducerHandlerService.reduce(
+        stateItem,
+        event,
+      );
 
-      if (reducerResponse && reducerResponse.data) {
-        const [modified, newProps] = reducerResponse.data;
+      if (reducerResult) {
+        const [modified, newProps] = reducerResult;
 
         if (modified && newProps) {
           const newState = {

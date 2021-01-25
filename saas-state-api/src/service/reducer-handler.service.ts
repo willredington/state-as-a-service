@@ -15,7 +15,7 @@ export class ReducerHandlerService {
     private readonly regRepository: StateRegistryRepository,
   ) {}
 
-  async update(stateItem: StateItem, event: StateEvent) {
+  async reduce(stateItem: StateItem, event: StateEvent) {
     const registryItem = await this.regRepository.findByStateKey(
       stateItem.name,
     );
