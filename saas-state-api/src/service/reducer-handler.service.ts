@@ -21,7 +21,7 @@ export class ReducerHandlerService {
     );
 
     if (registryItem) {
-      const reducer: Reducer = this.moduleRef.get(registryItem.reducer);
+      const reducer: Reducer = this.moduleRef.get(registryItem.reducerKey);
       return reducer.reduce(stateItem.props, event);
     }
   }

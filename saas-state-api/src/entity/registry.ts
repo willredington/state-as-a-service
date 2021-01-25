@@ -1,7 +1,8 @@
-import { Entity, Column, PrimaryGeneratedColumn } from 'typeorm';
+import { Column, Entity, OneToMany, PrimaryGeneratedColumn } from 'typeorm';
+import { ActionItem } from './action';
 
 @Entity()
-export class StateRegistry {
+export class StateRegistryItem {
   @PrimaryGeneratedColumn()
   id: number;
 
@@ -9,5 +10,8 @@ export class StateRegistry {
   stateKey: string;
 
   @Column()
-  reducer: string;
+  reducerKey: string;
+
+  @OneToMany(() => ActionItem, (action) => action.stateItem)
+  actions: ActionItem[];
 }
