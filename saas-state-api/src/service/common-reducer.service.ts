@@ -1,11 +1,20 @@
 import { Injectable } from '@nestjs/common';
 import { StateEvent } from 'src/model/event';
-import { StateProps } from 'src/model/state';
 import { Reducer } from './reducer-handler.service';
 
+export type CommonState = {
+  date: string;
+};
+
 @Injectable()
-export class CommonReducerService implements Reducer {
-  reduce(props: StateProps, event: StateEvent): [boolean, StateProps] {
+export class CommonReducerService implements Reducer<CommonState> {
+  initial() {
+    return {
+      date: new Date().toISOString().slice(0, 10),
+    };
+  }
+
+  reduce(props: CommonState, event: StateEvent): [boolean, CommonState] {
     switch (event.type) {
       case 'SET_DATE':
         return [

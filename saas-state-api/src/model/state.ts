@@ -1,8 +1,4 @@
-export interface StateProps {
-  [key: string]: any;
-}
-
-export interface StateItem {
+export interface StateItem<T = any> {
   name: string;
-  props: StateProps;
+  props: T;
 }

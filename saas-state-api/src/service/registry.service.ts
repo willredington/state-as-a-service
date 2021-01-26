@@ -1,41 +1,28 @@
 import { Injectable } from '@nestjs/common';
 import { CreateRegistryDto } from 'src/dto/registry';
-import { ActionItem } from 'src/entity/action';
-import { StateRegistryItem } from 'src/entity/registry';
-import { ActionRepository } from 'src/repository/action';
-import { StateRegistryRepository } from 'src/repository/registry';
+import { DbService } from './db.service';
 
 @Injectable()
 export class RegistryService {
-  constructor(
-    private readonly registryRepository: StateRegistryRepository,
-    private readonly actionRepository: ActionRepository,
-  ) {}
+  constructor(private readonly dbService: DbService) {}
 
   async findByStateKey(stateKey: string) {
-    return this.registryRepository.findByStateKey(stateKey);
+    return await this.dbService.stateRegistry.findFirst({
+      where: {
+        stateKey,
+      },
+    });
   }
 
   async create(dto: CreateRegistryDto) {
-    const registry = await this.registryRepository.save({
-      stateKey: dto.stateKey,
-      reducerKey: dto.reducerKey,
+    return await this.dbService.stateRegistry.create({
+      data: {
+        stateKey: dto.stateKey,
+        reducerKey: dto.reducerKey,
+        actions: {
+          create: dto.actions.map((item) => ({ actionType: item.actionType })),
+        },
+      },
     });
-
-    const actions = await this.actionRepository.save(
-      dto.actions.map((action) => {
-        return {
-          ...action,
-          stateItem: registry,
-        } as Partial<ActionItem>;
-      }),
-    );
-
-    console.log('created actions', actions);
-
-    return this.registryRepository.save({
-      ...registry,
-      actions,
-    }) as Promise<StateRegistryItem>;
   }
 }

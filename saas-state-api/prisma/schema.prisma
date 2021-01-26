@@ -1,0 +1,29 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model StateAction {
+  id              Int            @id @default(autoincrement())
+  actionType      String
+  stateRegistry   StateRegistry? @relation(fields: [stateRegistryId], references: [id])
+  stateRegistryId Int?
+
+  @@map(name: "state_action")
+}
+
+model StateRegistry {
+  id         Int           @id @default(autoincrement())
+  stateKey   String
+  reducerKey String
+  actions    StateAction[]
+
+  @@map(name: "state_registry")
+}
