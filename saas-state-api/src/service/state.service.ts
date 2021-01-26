@@ -16,6 +16,9 @@ export class StateService {
 
   private async create(key: string) {
     const props = await this.reducerHandlerService.getDefault(key);
+    if (!props) {
+    }
+
     await this.redisService.setItem(key, JSON.stringify(props));
     return props;
   }
