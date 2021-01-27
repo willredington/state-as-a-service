@@ -10,21 +10,58 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model StateAction {
-  id              Int            @id @default(autoincrement())
-  actionType      String
-  validatorKey    String
-  stateRegistry   StateRegistry? @relation(fields: [stateRegistryId], references: [id])
-  stateRegistryId Int?
+enum PropertyType {
+  STRING
+  BOOLEAN
+  NUMBER
+  LIST
+}
 
-  @@map(name: "state_action")
+model StateValidator {
+  id           Int            @id @default(autoincrement())
+  validatorClz String
+  handlers     StateHandler[]
+}
+
+model StateHandler {
+  id          Int            @id @default(autoincrement())
+  name        String
+  handlerClz  String
+  actions     StateAction[]
+  validator   StateValidator @relation(fields: [validatorId], references: [id])
+  validatorId Int
+}
+
+model StateAction {
+  id           Int           @id @default(autoincrement())
+  name         String
+  actionType   String
+  property     String
+  propertyType PropertyType
+  handler      StateHandler? @relation(fields: [handlerId], references: [id])
+  handlerId    Int?
+  reducer      StateReducer? @relation(fields: [reducerId], references: [id])
+  reducerId    Int?
+}
+
+model StateReducer {
+  id         Int           @id @default(autoincrement())
+  name       String
+  actions    StateAction[]
+  registry   StateRegistry @relation(fields: [registryId], references: [id])
+  registryId Int
+}
+
+model StateSchema {
+  id               Int           @id @default(autoincrement())
+  schemaFactoryClz String
+  registry         StateRegistry @relation(fields: [registryId], references: [id])
+  registryId       Int
 }
 
 model StateRegistry {
-  id         Int           @id @default(autoincrement())
-  stateKey   String
-  reducerKey String
-  actions    StateAction[]
-
-  @@map(name: "state_registry")
+  id      Int           @id @default(autoincrement())
+  name    String
+  reducer StateReducer?
+  schema  StateSchema?
 }

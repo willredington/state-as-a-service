@@ -8,6 +8,6 @@ export class RegistryController {
 
   @Post('create')
   async createState(@Body() dto: CreateRegistryDto) {
-    return this.registryService.create(dto);
+    // return this.registryService.create(dto);
   }
 }

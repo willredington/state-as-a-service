@@ -3,7 +3,7 @@ import { useEffect, useRef } from "react";
 import io from "socket.io-client";
 
 const useSocket = () => {
-	const { current: socket } = useRef(io(ENV.API));
+	const { current: socket } = useRef(io(ENV.NOTIFICATION_API));
 
 	useEffect(() => {
 		return () => {

@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { CommonState, StateEvent } from 'saas-common';
-import { Reducer } from './reducer-handler.service';
+import { Reducer } from '.';
 
 @Injectable()
 export class CommonReducerService implements Reducer<CommonState> {

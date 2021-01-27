@@ -1,66 +1,68 @@
-import { BadRequestException, Injectable } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
-import { StateEvent } from 'saas-common';
-import {
-  ActionNotFoundException,
-  ActionValidatorNotFoundException,
-} from 'src/exception/action';
-import { StateItem } from 'src/model/state';
-import { Validator } from 'src/validator';
+import { ActionHandlerService } from 'src/handler/handler.service';
+import { StateEvent } from 'src/model/event';
+import { SchemaFactory } from 'src/schema';
 import { RegistryService } from '../service/registry.service';
-
-export interface Reducer<T = any> {
-  initial(): T;
-  reduce(props: T, event: StateEvent): [boolean, T];
-}
 
 @Injectable()
 export class ReducerHandlerService {
+  private readonly logger = new Logger(ReducerHandlerService.name);
+
   constructor(
     private readonly moduleRef: ModuleRef,
     private readonly registryService: RegistryService,
+    private readonly handlerService: ActionHandlerService,
   ) {}
 
-  private async validatePayload(event: StateEvent) {
-    const action = await this.registryService.findAction(
-      event.type,
-      event.stateKey,
+  private async getRegistry(name: string) {
+    const registry = await this.registryService.findRegistryByName(name);
+
+    if (!registry) {
+      this.logger.error('could not find registry');
+      throw new NotFoundException();
+    }
+
+    return registry;
+  }
+
+  private async getAction(event: StateEvent) {
+    const registry = await this.getRegistry(event.registryName);
+    const reducer = await this.registryService.findReducerByRegistry(
+      registry.id,
+    );
+
+    if (!reducer) {
+      this.logger.error('could not find reducer');
+      throw new NotFoundException();
+    }
+
+    const action = this.registryService.findAction(
+      event.actionName,
+      reducer.id,
     );
 
     if (!action) {
-      throw new ActionNotFoundException();
+      this.logger.error('could not find action');
+      throw new NotFoundException();
     }
 
-    const validator: Validator = this.moduleRef.get(action.validatorKey);
-    if (!validator) {
-      throw new ActionValidatorNotFoundException();
-    }
-
-    if (!validator.validate(event.payload)) {
-      throw new BadRequestException('payload is invalid');
-    }
+    return action;
   }
 
-  async getDefault(stateKey: string) {
-    const registryItem = await this.registryService.findByStateKey(stateKey);
+  async getDefault(registryName: string) {
+    const registry = await this.getRegistry(registryName);
+    const schema = await this.registryService.findSchema(registry.id);
 
-    if (registryItem) {
-      const reducer: Reducer = this.moduleRef.get(registryItem.reducerKey);
-      return reducer.initial();
-    }
-  }
-
-  async reduce(stateItem: StateItem, event: StateEvent) {
-    const registryItem = await this.registryService.findByStateKey(
-      stateItem.name,
+    const schemaFactory: SchemaFactory = await this.moduleRef.get(
+      schema.schemaFactoryClz,
     );
 
-    if (registryItem) {
-      // validate the incoming event against the registered action
-      await this.validatePayload(event);
+    return schemaFactory.generate();
+  }
 
-      const reducer: Reducer = this.moduleRef.get(registryItem.reducerKey);
-      return reducer.reduce(stateItem.props, event);
-    }
+  async reduce(event: StateEvent, currentState: any) {
+    const action = await this.getAction(event);
+    return this.handlerService.handle(action, event.payload, currentState);
   }
 }

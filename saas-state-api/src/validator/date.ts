@@ -7,7 +7,7 @@ export class DateValidator implements Validator {
   validate(value: any): boolean {
     return (
       typeof value === 'string' &&
-      moment(value as string, 'YYYY-MM-DD').isValid()
+      moment(value as string, 'YYYY-MM-DD', true).isValid()
     );
   }
 }

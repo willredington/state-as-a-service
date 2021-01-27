@@ -1,9 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { isEmpty } from 'lodash';
-import { StateEvent } from 'saas-common';
-import { StateItem } from 'src/model/state';
-import { RedisService } from './redis.service';
+import { StateEvent } from 'src/model/event';
 import { ReducerHandlerService } from '../reducer/reducer-handler.service';
+import { RedisService } from './redis.service';
 
 @Injectable()
 export class StateService {
@@ -14,9 +13,14 @@ export class StateService {
     private readonly reducerHandlerService: ReducerHandlerService,
   ) {}
 
-  private async create(key: string) {
-    const props = await this.reducerHandlerService.getDefault(key);
-    await this.redisService.setItem(key, JSON.stringify(props));
+  private async create(registryName: string) {
+    const props = await this.reducerHandlerService.getDefault(registryName);
+    const payload = JSON.stringify(props);
+
+    this.logger.debug('using the following props for default', payload);
+
+    await this.redisService.setItem(registryName, payload);
+
     return props;
   }
 
@@ -31,30 +35,21 @@ export class StateService {
     return JSON.parse(payload);
   }
 
-  async update(event: StateEvent): Promise<StateItem> {
-    const stateItem = await this.findByKey(event.stateKey);
+  async update(event: StateEvent) {
+    const currentState = await this.findByKey(event.registryName);
+    const newState = await this.reducerHandlerService.reduce(
+      event,
+      currentState,
+    );
 
-    if (stateItem) {
-      const reducerResult = await this.reducerHandlerService.reduce(
-        stateItem,
-        event,
-      );
+    if (newState) {
+      const payload = JSON.stringify(newState);
 
-      if (reducerResult) {
-        const [modified, newProps] = reducerResult;
+      this.logger.debug('got new state', payload);
 
-        if (modified && newProps) {
-          this.logger.debug(
-            'properties have changed, setting value in redis cache',
-          );
-          await this.redisService.setItem(
-            event.stateKey,
-            JSON.stringify(newProps),
-          );
+      await this.redisService.setItem(event.registryName, payload);
 
-          return newProps;
-        }
-      }
+      return newState;
     }
   }
 }

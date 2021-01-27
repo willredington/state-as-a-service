@@ -1,5 +1,12 @@
+import { PropertyType } from '@prisma/client';
+
 export interface CreateActionDto {
-  name: string;
+  reducerId: number;
+  actionName: string;
   actionType: string;
-  validatorKey: string;
+  property: string;
+  propertyType: PropertyType;
+  handlerName: string;
+  handlerClz: string;
+  validatorClz: string;
 }
