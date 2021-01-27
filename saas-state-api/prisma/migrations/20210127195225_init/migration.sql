@@ -22,6 +22,7 @@ CREATE TABLE "StateHandler" (
 -- CreateTable
 CREATE TABLE "StateAction" (
     "id" SERIAL NOT NULL,
+    "name" TEXT NOT NULL,
     "actionType" TEXT NOT NULL,
     "property" TEXT NOT NULL,
     "propertyType" "PropertyType" NOT NULL,
@@ -52,7 +53,7 @@ CREATE TABLE "StateSchema" (
 -- CreateTable
 CREATE TABLE "StateRegistry" (
     "id" SERIAL NOT NULL,
-    "stateKey" TEXT NOT NULL,
+    "name" TEXT NOT NULL,
 
     PRIMARY KEY ("id")
 );

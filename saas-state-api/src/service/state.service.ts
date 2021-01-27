@@ -1,6 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { isEmpty } from 'lodash';
-import { StateEvent } from 'src/model/event';
+import { StateEvent } from 'saas-common';
 import { ReducerHandlerService } from '../reducer/reducer-handler.service';
 import { RedisService } from './redis.service';
 

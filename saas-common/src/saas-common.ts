@@ -1,13 +1,10 @@
-interface BaseEvent {
-  created: number
+export type StateEvent = {
+  registryName: string
+  actionName: string
   payload?: any
-}
-
-export interface StateEvent extends BaseEvent {
-  type: string
-  stateKey: string
 }
 
 export type CommonState = {
   date: string
+  todos: string[]
 }

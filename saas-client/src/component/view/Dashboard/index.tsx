@@ -1,34 +1,41 @@
+import SimpleCard from "component/common/Card/SimpleCard";
 import { ENV } from "env";
 import useSocket from "hook/socket";
 import React, { useEffect, useState } from "react";
-import Calendar from "react-calendar";
-import "react-calendar/dist/Calendar.css";
-import { CommonState } from "saas-common";
+
 import { getStateByName } from "service/state";
+import Datepicker from "./Datepicker";
+import Todos from "./Todos";
+
+type CommonState = {
+	date: string;
+	todos: string[];
+};
 
 export const Dashboard: React.FC = () => {
 	const [socket] = useSocket();
-	const [date, setDate] = useState(new Date());
 	const [state, setState] = useState<CommonState>();
-
-	const handleDateChange = (value: Date | Date[]) => {
-		if (value && !Array.isArray(value)) {
-			setDate(value as Date);
-		}
-	};
 
 	const handleUpdated = (newState: CommonState) => {
 		if (newState) {
+			console.log("got new state", newState);
 			setState(newState);
 		}
 	};
 
-	const sendMessage = (date: Date) => {
+	const sendDateMessage = (date: Date) => {
 		socket.emit("update", {
-			created: new Date().getTime(),
-			type: "SET_DATE",
-			stateKey: "myApp",
+			registryName: "myApp",
+			actionName: "date",
 			payload: date.toISOString().slice(0, 10),
+		});
+	};
+
+	const sendTodosMessage = (todo: string) => {
+		socket.emit("update", {
+			registryName: "myApp",
+			actionName: "todos",
+			payload: todo,
 		});
 	};
 
@@ -43,15 +50,25 @@ export const Dashboard: React.FC = () => {
 	}, [socket]);
 
 	return (
-		<div className="flex">
-			<div className="mx-8">
-				<p>State Date {state?.date}</p>
-				<Calendar
-					onChange={handleDateChange}
-					showWeekNumbers
-					value={date}
-				/>
-				<button onClick={() => sendMessage(date)}>SEND</button>
+		<div className="flex flex-col justify-center">
+			<div className="mx-16">
+				<SimpleCard>
+					<p>Date: {state?.date}</p>
+					<p>Todos</p>
+					<ul>
+						{state?.todos.map((todo) => (
+							<li key={todo}>{todo}</li>
+						))}
+					</ul>
+				</SimpleCard>
+				<hr className="mb-8" />
+				<SimpleCard>
+					<Datepicker dateCallback={sendDateMessage} />
+				</SimpleCard>
+				<hr className="mb-8" />
+				<SimpleCard>
+					<Todos clickCallback={sendTodosMessage} />
+				</SimpleCard>
 			</div>
 		</div>
 	);

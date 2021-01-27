@@ -1,7 +1,7 @@
 import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ModuleRef } from '@nestjs/core';
+import { StateEvent } from 'saas-common';
 import { ActionHandlerService } from 'src/handler/handler.service';
-import { StateEvent } from 'src/model/event';
 import { SchemaFactory } from 'src/schema';
 import { RegistryService } from '../service/registry.service';
 

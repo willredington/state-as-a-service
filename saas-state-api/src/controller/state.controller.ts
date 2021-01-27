@@ -1,5 +1,5 @@
 import { Body, Controller, Get, Param, Put } from '@nestjs/common';
-import { StateEvent } from 'src/model/event';
+import { StateEvent } from 'saas-common';
 import { StateService } from 'src/service/state.service';
 
 @Controller('api/state')

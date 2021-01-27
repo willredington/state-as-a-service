@@ -48,6 +48,17 @@ export const appConfig: AppConfig = {
               validatorClz: 'DateValidator',
             },
           },
+          {
+            name: 'todos',
+            actionType: 'SET_TODOS',
+            property: 'todos',
+            propertyType: PropertyType.LIST,
+            handler: {
+              name: 'SimpleListHandler',
+              handlerClz: 'ListHandler',
+              validatorClz: 'StringValidator',
+            },
+          },
         ],
       },
     },
