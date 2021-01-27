@@ -1,35 +1,24 @@
+import { ENV } from "env";
 import useSocket from "hook/socket";
-import { StateItem } from "model/state";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useEffect, useState } from "react";
 import Calendar from "react-calendar";
 import "react-calendar/dist/Calendar.css";
+import { CommonState } from "saas-common";
 import { getStateByName } from "service/state";
 
 export const Dashboard: React.FC = () => {
 	const [socket] = useSocket();
-	const [state, setState] = useState<StateItem>({
-		name: "myApp",
-		props: {
-			data: new Date().toISOString().slice(0, 10),
-		},
-	});
-
-	const selectedDate = useMemo(() => {
-		if ("date" in state.props) {
-			return new Date(state.props["date"]);
-		}
-	}, [state]);
+	const [date, setDate] = useState(new Date());
+	const [state, setState] = useState<CommonState>();
 
 	const handleDateChange = (value: Date | Date[]) => {
-		console.log("value", value);
 		if (value && !Array.isArray(value)) {
-			sendMessage(value as Date);
+			setDate(value as Date);
 		}
 	};
 
-	const handleUpdated = (newState: StateItem) => {
+	const handleUpdated = (newState: CommonState) => {
 		if (newState) {
-			console.log("got new state", newState);
 			setState(newState);
 		}
 	};
@@ -44,7 +33,9 @@ export const Dashboard: React.FC = () => {
 	};
 
 	useEffect(() => {
-		getStateByName("myApp").then((result) => setState(result));
+		getStateByName<CommonState>(ENV.STATE_KEY).then((result) =>
+			setState(result)
+		);
 	}, []);
 
 	useEffect(() => {
@@ -54,12 +45,13 @@ export const Dashboard: React.FC = () => {
 	return (
 		<div className="flex">
 			<div className="mx-8">
-				<p>{state.props["date"]}</p>
+				<p>State Date {state?.date}</p>
 				<Calendar
 					onChange={handleDateChange}
 					showWeekNumbers
-					value={selectedDate}
+					value={date}
 				/>
+				<button onClick={() => sendMessage(date)}>SEND</button>
 			</div>
 		</div>
 	);

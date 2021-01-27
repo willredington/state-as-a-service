@@ -1,7 +1,6 @@
 import ENV from "env";
-import { StateItem } from "model/state";
 
-export async function getStateByName(name: string): Promise<StateItem> {
+export async function getStateByName<T>(name: string): Promise<T> {
 	return fetch(`${ENV.STATE_API}/api/state/item/${name}`).then((resp) =>
 		resp.json()
 	);

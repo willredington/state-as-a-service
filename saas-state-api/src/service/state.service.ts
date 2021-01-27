@@ -1,9 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { isEmpty } from 'lodash';
-import { StateEvent } from 'src/model/event';
+import { StateEvent } from 'saas-common';
 import { StateItem } from 'src/model/state';
 import { RedisService } from './redis.service';
-import { ReducerHandlerService } from './reducer-handler.service';
+import { ReducerHandlerService } from '../reducer/reducer-handler.service';
 
 @Injectable()
 export class StateService {
@@ -16,9 +16,6 @@ export class StateService {
 
   private async create(key: string) {
     const props = await this.reducerHandlerService.getDefault(key);
-    if (!props) {
-    }
-
     await this.redisService.setItem(key, JSON.stringify(props));
     return props;
   }

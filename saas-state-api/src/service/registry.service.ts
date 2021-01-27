@@ -21,13 +21,24 @@ export class RegistryService {
     return result;
   }
 
+  async findAction(actionType: string, stateKey: string) {
+    return this.dbService.stateAction.findFirst({
+      where: {
+        actionType,
+        stateRegistry: {
+          stateKey,
+        },
+      },
+    });
+  }
+
   async create(dto: CreateRegistryDto) {
     return await this.dbService.stateRegistry.create({
       data: {
         stateKey: dto.stateKey,
         reducerKey: dto.reducerKey,
         actions: {
-          create: dto.actions.map((item) => ({ actionType: item.actionType })),
+          create: dto.actions,
         },
       },
     });

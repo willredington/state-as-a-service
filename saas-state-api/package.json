@@ -32,11 +32,13 @@
     "amqp-connection-manager": "^3.2.1",
     "amqplib": "^0.6.0",
     "lodash": "^4.17.20",
+    "moment": "^2.29.1",
     "pg": "^8.5.1",
     "redis": "^3.0.2",
     "reflect-metadata": "^0.1.13",
     "rimraf": "^3.0.2",
     "rxjs": "^6.6.3",
+    "saas-common": "../saas-common",
     "uuid": "^8.3.2"
   },
   "devDependencies": {

@@ -1,10 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { StateEvent } from 'src/model/event';
+import { CommonState, StateEvent } from 'saas-common';
 import { Reducer } from './reducer-handler.service';
-
-export type CommonState = {
-  date: string;
-};
 
 @Injectable()
 export class CommonReducerService implements Reducer<CommonState> {

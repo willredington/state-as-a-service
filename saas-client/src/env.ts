@@ -1,5 +1,6 @@
 export const ENV = {
 	API: process.env.REACT_APP_API,
+	STATE_KEY: process.env.REACT_APP_STATE_KEY,
 	STATE_API: process.env.REACT_APP_STATE_API,
 };
 
